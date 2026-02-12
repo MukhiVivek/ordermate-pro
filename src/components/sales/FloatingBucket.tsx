@@ -156,10 +156,6 @@ export const FloatingBucket = ({
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>₹{totals.subtotal.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">GST (18%)</span>
-                    <span>₹{totals.tax.toLocaleString()}</span>
-                  </div>
                   <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
                     <span>Total</span>
                     <span className="text-primary">₹{totals.total.toLocaleString()}</span>
