@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Minus, Plus, Trash2, ChevronUp } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Trash2, ChevronUp, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { CartItem } from '@/types/sales';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface FloatingBucketProps {
   cart: CartItem[];
