@@ -68,8 +68,8 @@ export const useCart = () => {
       (sum, item) => sum + (item.variant.price * item.quantity),
       0
     );
-    const tax = subtotal * 0.18; // 18% GST
-    const total = subtotal + tax;
+    const tax = 0;
+    const total = subtotal;
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     return { subtotal, tax, total, itemCount };

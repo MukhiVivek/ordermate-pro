@@ -74,6 +74,15 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               </button>
             ))}
           </div>
+          {/* Mobile: Show selling price & MRP when variant selected */}
+          {selectedVariant && (
+            <div className="flex items-center gap-1 sm:hidden">
+              <span className="text-[9px] font-semibold text-primary">₹{selectedVariant.price.toLocaleString()}</span>
+              {selectedVariant.mrp > selectedVariant.price && (
+                <span className="text-[8px] text-muted-foreground line-through">₹{selectedVariant.mrp.toLocaleString()}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Add to Cart Button */}

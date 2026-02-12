@@ -2,6 +2,7 @@
 export interface ProductVariant {
   size: string;
   price: number;
+  mrp: number;
   stock: number;
   sku: string;
 }
