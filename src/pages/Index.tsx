@@ -19,7 +19,8 @@ const Index = () => {
   const { 
     cart, 
     addToCart, 
-    updateQuantity, 
+    updateQuantity,
+    updatePrice, 
     removeFromCart, 
     clearCart, 
     totals, 
@@ -157,6 +158,7 @@ const Index = () => {
         cart={cart}
         totals={totals}
         onUpdateQuantity={updateQuantity}
+        onUpdatePrice={updatePrice}
         onRemove={removeFromCart}
         onCheckout={handleCheckout}
       />

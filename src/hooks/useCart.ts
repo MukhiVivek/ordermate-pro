@@ -43,6 +43,16 @@ export const useCart = () => {
     });
   }, []);
 
+  const updatePrice = useCallback((productId: string, sku: string, price: number) => {
+    setCart(prev =>
+      prev.map(item =>
+        item.productId === productId && item.variant.sku === sku
+          ? { ...item, variant: { ...item.variant, price } }
+          : item
+      )
+    );
+  }, []);
+
   const removeFromCart = useCallback((productId: string, sku: string) => {
     setCart(prev => prev.filter(
       item => !(item.productId === productId && item.variant.sku === sku)
@@ -79,6 +89,7 @@ export const useCart = () => {
     cart,
     addToCart,
     updateQuantity,
+    updatePrice,
     removeFromCart,
     clearCart,
     totals,
