@@ -157,6 +157,7 @@ const Index = () => {
         cart={cart}
         totals={totals}
         onUpdateQuantity={updateQuantity}
+        onUpdatePrice={updatePrice}
         onRemove={removeFromCart}
         onCheckout={handleCheckout}
       />
