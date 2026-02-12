@@ -23,10 +23,13 @@ export const FloatingBucket = ({
   cart,
   totals,
   onUpdateQuantity,
+  onUpdatePrice,
   onRemove,
   onCheckout
 }: FloatingBucketProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [editingPrice, setEditingPrice] = useState<string | null>(null);
+  const [priceInput, setPriceInput] = useState('');
 
   if (cart.length === 0) return null;
 
