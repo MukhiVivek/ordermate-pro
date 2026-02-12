@@ -89,6 +89,7 @@ export const useCart = () => {
     cart,
     addToCart,
     updateQuantity,
+    updatePrice,
     removeFromCart,
     clearCart,
     totals,
