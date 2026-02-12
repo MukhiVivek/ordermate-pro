@@ -14,6 +14,7 @@ interface FloatingBucketProps {
     itemCount: number;
   };
   onUpdateQuantity: (productId: string, sku: string, quantity: number) => void;
+  onUpdatePrice: (productId: string, sku: string, price: number) => void;
   onRemove: (productId: string, sku: string) => void;
   onCheckout: () => void;
 }
