@@ -19,7 +19,8 @@ const Index = () => {
   const { 
     cart, 
     addToCart, 
-    updateQuantity, 
+    updateQuantity,
+    updatePrice, 
     removeFromCart, 
     clearCart, 
     totals, 
