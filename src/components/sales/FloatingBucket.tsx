@@ -81,9 +81,47 @@ export const FloatingBucket = ({
                           {item.productName}
                         </p>
                         <p className="text-xs text-muted-foreground">{item.variant.size}</p>
-                        <p className="text-sm font-semibold text-primary mt-1">
-                          ₹{(item.variant.price * item.quantity).toLocaleString()}
-                        </p>
+                        {editingPrice === `${item.productId}-${item.variant.sku}` ? (
+                          <div className="flex items-center gap-1 mt-1">
+                            <span className="text-sm text-muted-foreground">₹</span>
+                            <Input
+                              type="number"
+                              value={priceInput}
+                              onChange={(e) => setPriceInput(e.target.value)}
+                              onBlur={() => {
+                                const newPrice = parseFloat(priceInput);
+                                if (!isNaN(newPrice) && newPrice > 0) {
+                                  onUpdatePrice(item.productId, item.variant.sku, newPrice);
+                                }
+                                setEditingPrice(null);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  const newPrice = parseFloat(priceInput);
+                                  if (!isNaN(newPrice) && newPrice > 0) {
+                                    onUpdatePrice(item.productId, item.variant.sku, newPrice);
+                                  }
+                                  setEditingPrice(null);
+                                }
+                              }}
+                              autoFocus
+                              className="h-6 w-20 text-sm px-1"
+                            />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setEditingPrice(`${item.productId}-${item.variant.sku}`);
+                              setPriceInput(item.variant.price.toString());
+                            }}
+                            className="flex items-center gap-1 mt-1 group/price"
+                          >
+                            <p className="text-sm font-semibold text-primary">
+                              ₹{item.variant.price.toLocaleString()} × {item.quantity} = ₹{(item.variant.price * item.quantity).toLocaleString()}
+                            </p>
+                            <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover/price:opacity-100 transition-opacity" />
+                          </button>
+                        )}
                       </div>
 
                       {/* Quantity Controls */}
