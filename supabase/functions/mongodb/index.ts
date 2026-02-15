@@ -9,93 +9,106 @@ const corsHeaders = {
 const sampleProducts = [
   {
     _id: '1',
-    name: 'Premium Engine Oil',
-    description: 'High-quality synthetic engine oil for all vehicles',
-    image: '/placeholder.svg',
-    category: 'Lubricants',
+    name: 'Achar Masala',
+    description: 'Gath Chhap premium pickle masala powder',
+    image: '/products/achar-masala.jpg',
+    category: 'Masala',
     variants: [
-      { size: '1L Bottle', price: 450, stock: 100, sku: 'OIL-1L' },
-      { size: '5L Jar', price: 1800, stock: 50, sku: 'OIL-5L' },
-      { size: '15L Tin', price: 4500, stock: 25, sku: 'OIL-15L' }
+      { size: '100g', price: 30, mrp: 35, stock: 200, sku: 'ACH-100' },
+      { size: '200g', price: 55, mrp: 65, stock: 150, sku: 'ACH-200' },
+      { size: '500g', price: 120, mrp: 140, stock: 100, sku: 'ACH-500' }
     ]
   },
   {
     _id: '2',
-    name: 'Brake Fluid DOT 4',
-    description: 'Premium brake fluid for all vehicles',
-    image: '/placeholder.svg',
-    category: 'Fluids',
+    name: 'Besan',
+    description: 'Gath Chhap superfine gram flour',
+    image: '/products/besan.webp',
+    category: 'Flour',
     variants: [
-      { size: '500ml', price: 280, stock: 150, sku: 'BF-500' },
-      { size: '1L Bottle', price: 480, stock: 80, sku: 'BF-1L' }
+      { size: '500g', price: 45, mrp: 50, stock: 150, sku: 'BES-500' },
+      { size: '1kg', price: 85, mrp: 95, stock: 100, sku: 'BES-1K' }
     ]
   },
   {
     _id: '3',
-    name: 'Coolant Antifreeze',
-    description: 'All-season engine coolant for optimal performance',
-    image: '/placeholder.svg',
-    category: 'Fluids',
+    name: 'Coriander Cumin Powder',
+    description: 'Gath Chhap dhania jeera powder',
+    image: '/products/dhanajiru.jpg',
+    category: 'Masala',
     variants: [
-      { size: '1L Bottle', price: 320, stock: 120, sku: 'COOL-1L' },
-      { size: '5L Jar', price: 1400, stock: 40, sku: 'COOL-5L' },
-      { size: '20L Drum', price: 4800, stock: 15, sku: 'COOL-20L' }
+      { size: '100g', price: 28, mrp: 32, stock: 200, sku: 'DJ-100' },
+      { size: '200g', price: 50, mrp: 58, stock: 150, sku: 'DJ-200' },
+      { size: '500g', price: 110, mrp: 130, stock: 80, sku: 'DJ-500' }
     ]
   },
   {
     _id: '4',
-    name: 'Transmission Fluid ATF',
-    description: 'Automatic transmission fluid for smooth gear shifts',
-    image: '/placeholder.svg',
-    category: 'Lubricants',
+    name: 'Turmeric Powder',
+    description: 'Gath Chhap haldi powder',
+    image: '/products/haldi.jpg',
+    category: 'Masala',
     variants: [
-      { size: '1L Bottle', price: 550, stock: 90, sku: 'TF-1L' },
-      { size: '4L Pack', price: 1900, stock: 35, sku: 'TF-4L' }
+      { size: '100g', price: 22, mrp: 25, stock: 200, sku: 'HAL-100' },
+      { size: '200g', price: 40, mrp: 45, stock: 150, sku: 'HAL-200' },
+      { size: '500g', price: 90, mrp: 105, stock: 100, sku: 'HAL-500' }
     ]
   },
   {
     _id: '5',
-    name: 'Power Steering Fluid',
-    description: 'Universal power steering fluid for smooth handling',
-    image: '/placeholder.svg',
-    category: 'Fluids',
+    name: 'Extra Hot Chilli Powder',
+    description: 'Gath Chhap extra hot mirch powder',
+    image: '/products/hot-chilli.jpg',
+    category: 'Masala',
     variants: [
-      { size: '500ml', price: 220, stock: 200, sku: 'PS-500' },
-      { size: '1L Bottle', price: 380, stock: 100, sku: 'PS-1L' }
+      { size: '100g', price: 35, mrp: 40, stock: 180, sku: 'HOT-100' },
+      { size: '200g', price: 65, mrp: 75, stock: 120, sku: 'HOT-200' },
+      { size: '500g', price: 140, mrp: 160, stock: 60, sku: 'HOT-500' }
     ]
   },
   {
     _id: '6',
-    name: 'Diesel Engine Oil 15W-40',
-    description: 'Heavy-duty diesel engine oil for commercial vehicles',
-    image: '/placeholder.svg',
-    category: 'Lubricants',
+    name: 'Maida',
+    description: 'Uttam superfine maida flour',
+    image: '/products/maida.png',
+    category: 'Flour',
     variants: [
-      { size: '5L Jar', price: 2200, stock: 60, sku: 'DEO-5L' },
-      { size: '10L Drum', price: 4000, stock: 30, sku: 'DEO-10L' },
-      { size: '20L Drum', price: 7500, stock: 20, sku: 'DEO-20L' }
+      { size: '500g', price: 25, mrp: 28, stock: 200, sku: 'MAI-500' },
+      { size: '1kg', price: 48, mrp: 54, stock: 100, sku: 'MAI-1K' }
     ]
   },
   {
     _id: '7',
-    name: 'Gear Oil 80W-90',
-    description: 'Multi-grade gear oil for manual transmissions',
-    image: '/placeholder.svg',
-    category: 'Lubricants',
+    name: 'Chilli Powder',
+    description: 'Gath Chhap mirch powder',
+    image: '/products/chilli-powder.webp',
+    category: 'Masala',
     variants: [
-      { size: '1L Bottle', price: 350, stock: 75, sku: 'GO-1L' },
-      { size: '5L Jar', price: 1500, stock: 40, sku: 'GO-5L' }
+      { size: '100g', price: 25, mrp: 30, stock: 200, sku: 'MRC-100' },
+      { size: '200g', price: 45, mrp: 55, stock: 150, sku: 'MRC-200' },
+      { size: '500g', price: 100, mrp: 120, stock: 80, sku: 'MRC-500' }
     ]
   },
   {
     _id: '8',
-    name: 'Windshield Washer Fluid',
-    description: 'Clear visibility windshield cleaner concentrate',
-    image: '/placeholder.svg',
-    category: 'Fluids',
+    name: 'Moraiyo',
+    description: 'Gath Chhap moraiyo fasting grain',
+    image: '/products/moraiyo.jpg',
+    category: 'Grain',
     variants: [
-      { size: '1L Bottle', price: 150, stock: 200, sku: 'WW-1L' },
-      { size: '5L Jar', price: 600, stock: 80, sku: 'WW-5L' }
+      { size: '250g', price: 40, mrp: 45, stock: 100, sku: 'MOR-250' },
+      { size: '500g', price: 75, mrp: 85, stock: 60, sku: 'MOR-500' }
+    ]
+  },
+  {
+    _id: '9',
+    name: 'Ragi Flour',
+    description: 'Gath Chhap chakki fresh ragi ka atta',
+    image: '/products/ragi.jpg',
+    category: 'Flour',
+    variants: [
+      { size: '500g', price: 50, mrp: 58, stock: 100, sku: 'RAG-500' },
+      { size: '1kg', price: 95, mrp: 110, stock: 50, sku: 'RAG-1K' }
     ]
   }
 ];

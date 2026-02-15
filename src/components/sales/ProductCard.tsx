@@ -38,8 +38,12 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       className="bg-card rounded-lg sm:rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-all duration-200 shadow-soft"
     >
       {/* Product Image */}
-      <div className="relative aspect-square bg-muted flex items-center justify-center">
-        <Package className="h-6 w-6 sm:h-16 sm:w-16 text-muted-foreground/50" />
+      <div className="relative aspect-square bg-muted flex items-center justify-center overflow-hidden">
+        {product.image && product.image !== '/placeholder.svg' ? (
+          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+        ) : (
+          <Package className="h-6 w-6 sm:h-16 sm:w-16 text-muted-foreground/50" />
+        )}
         <Badge className="absolute top-1 left-1 sm:top-3 sm:left-3 bg-secondary text-secondary-foreground text-[6px] sm:text-xs px-1 py-0 sm:px-2 sm:py-0.5">
           {product.category}
         </Badge>
