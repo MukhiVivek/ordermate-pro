@@ -125,14 +125,25 @@ export const FloatingBucket = ({
                       </div>
 
                       {/* Quantity Controls */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() => onUpdateQuantity(item.productId, item.variant.sku, item.quantity - 1)}
                           className="p-1.5 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
                         >
                           <Minus className="h-4 w-4" />
                         </button>
-                        <span className="w-8 text-center font-medium">{item.quantity}</span>
+                        <Input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (!isNaN(val) && val >= 0) {
+                              onUpdateQuantity(item.productId, item.variant.sku, val);
+                            }
+                          }}
+                          className="h-8 w-12 text-center text-sm font-medium px-1 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          min={1}
+                        />
                         <button
                           onClick={() => onUpdateQuantity(item.productId, item.variant.sku, item.quantity + 1)}
                           className="p-1.5 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
@@ -141,7 +152,7 @@ export const FloatingBucket = ({
                         </button>
                         <button
                           onClick={() => onRemove(item.productId, item.variant.sku)}
-                          className="p-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive transition-colors ml-2"
+                          className="p-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive transition-colors ml-1"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
