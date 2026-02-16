@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, Loader2 } from 'lucide-react';
+import { Package, Loader2, LogOut, User } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/hooks/useCart';
 import { SearchBar } from '@/components/sales/SearchBar';
@@ -8,32 +8,35 @@ import { ProductCard } from '@/components/sales/ProductCard';
 import { FloatingBucket } from '@/components/sales/FloatingBucket';
 import { InvoiceReview } from '@/components/sales/InvoiceReview';
 import { Product, ProductVariant } from '@/types/sales';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 
 type ViewState = 'catalog' | 'review';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentView, setCurrentView] = useState<ViewState>('catalog');
-  
+
+  const { user, logout } = useAuth();
   const { data: products, isLoading, error } = useProducts();
-  const { 
-    cart, 
-    addToCart, 
+  const {
+    cart,
+    addToCart,
     updateQuantity,
-    updatePrice, 
-    removeFromCart, 
-    clearCart, 
-    totals, 
-    toInvoiceItems 
+    updatePrice,
+    removeFromCart,
+    clearCart,
+    totals,
+    toInvoiceItems
   } = useCart();
 
   // Filter products based on search
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     if (!searchQuery) return products;
-    
+
     const query = searchQuery.toLowerCase();
-    return products.filter(p => 
+    return products.filter(p =>
       p.name.toLowerCase().includes(query) ||
       p.category.toLowerCase().includes(query) ||
       p.description.toLowerCase().includes(query)
@@ -76,16 +79,37 @@ const Index = () => {
       {/* Header */}
       <header className="sticky top-0 bg-card/95 backdrop-blur-sm border-b border-border z-30">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-2 bg-gradient-primary rounded-xl">
-              <Package className="h-6 w-6 text-primary-foreground" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-gradient-primary rounded-xl">
+                <Package className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">SalesFlow Pro</h1>
+                <p className="text-sm text-muted-foreground">Quick Order System</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">SalesFlow Pro</h1>
-              <p className="text-sm text-muted-foreground">Quick Order System</p>
+
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex flex-col items-end mr-2">
+                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Salesman</span>
+                <span className="text-sm font-bold text-foreground">{user?.username}</span>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                <User className="h-5 w-5 text-primary" />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={logout}
+                className="rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
           </div>
-          
+
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}
@@ -122,7 +146,7 @@ const Index = () => {
               </p>
             </div>
 
-            <motion.div 
+            <motion.div
               layout
               className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4"
             >

@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, FileText, CheckCircle, Clock, Download, User, Phone } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle, Clock, Download, User, Phone, Search } from 'lucide-react';
 import { CartItem, InvoiceItem } from '@/types/sales';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useCustomers, Customer } from '@/hooks/useCustomers';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/api';
+import { AnimatePresence } from 'framer-motion';
 
 interface InvoiceReviewProps {
   cart: CartItem[];
@@ -30,16 +33,45 @@ export const InvoiceReview = ({
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
   const [invoiceGenerated, setInvoiceGenerated] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'paid'>('pending');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const suggestionRef = useRef<HTMLDivElement>(null);
+  const { data: allCustomers = [] } = useCustomers();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredCustomers = allCustomers.filter(customer => {
+    const search = (customerName || customerPhone).toLowerCase();
+    if (!search) return false;
+
+    return (
+      customer.name.toLowerCase().includes(search) ||
+      (customer.phone_number?.toString() || '').includes(search)
+    );
+  }).slice(0, 5);
+
+  const handleSelectCustomer = (customer: Customer) => {
+    setCustomerName(customer.name);
+    setCustomerPhone(customer.phone_number?.toString() || '');
+    setSelectedCustomerId(customer._id);
+    setShowSuggestions(false);
+  };
 
   const generateInvoiceNumber = () => {
-    const date = new Date();
-    const prefix = 'INV';
-    const datePart = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
-    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    return `${prefix}-${datePart}-${random}`;
+    return Math.floor(1000 + Math.random() * 9000);
   };
 
   const handleGenerateInvoice = async (status: 'pending' | 'paid') => {
@@ -48,52 +80,45 @@ export const InvoiceReview = ({
       return;
     }
 
+    if (!selectedCustomerId) {
+      toast.error('Please select an existing customer from the list');
+      return;
+    }
+
     setIsProcessing(true);
     setPaymentStatus(status);
 
     try {
-      const newInvoiceNumber = generateInvoiceNumber();
-      
-      // Create invoice in MongoDB
-      const { data, error } = await supabase.functions.invoke('mongodb', {
-        body: {
-          action: 'createInvoice',
-          data: {
-            invoiceNumber: newInvoiceNumber,
-            items: invoiceItems,
-            subtotal: totals.subtotal,
-            tax: totals.tax,
-            total: totals.total,
-            status,
-            customerName,
-            customerPhone
-          }
-        }
+      const body = {
+        customer_id: selectedCustomerId,
+        invoice_number: `OM-${generateInvoiceNumber()}`,
+        items: cart.map(item => ({
+          product_id: item.productId,
+          name: item.productName,
+          qty: item.quantity,
+          price: item.variant.price,
+          tamount: item.quantity * item.variant.price
+        })),
+        subtotal: totals.subtotal,
+        tax: totals.tax,
+        total: totals.total,
+        status,
+        customerName,
+        customerPhone
+      };
+
+      const response = await apiRequest('/ordermate/add', {
+        method: 'POST',
+        body: JSON.stringify(body)
       });
 
-      if (error) throw error;
-
-      // Update stock for each item
-      for (const item of cart) {
-        await supabase.functions.invoke('mongodb', {
-          body: {
-            action: 'updateStock',
-            data: {
-              productId: item.productId,
-              sku: item.variant.sku,
-              quantity: -item.quantity
-            }
-          }
-        });
-      }
-
-      setInvoiceNumber(newInvoiceNumber);
+      setInvoiceNumber(response.id?.slice(-6).toUpperCase() || 'NEW');
       setInvoiceGenerated(true);
-      toast.success(`Invoice ${newInvoiceNumber} generated!`);
+      toast.success(`Invoice generated successfully!`);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Invoice generation error:', error);
-      toast.error('Failed to generate invoice');
+      toast.error(error.message || 'Failed to generate invoice');
     } finally {
       setIsProcessing(false);
     }
@@ -114,9 +139,9 @@ export const InvoiceReview = ({
       ----------------------------------------
       ITEMS
       ----------------------------------------
-      ${invoiceItems.map(item => 
-        `${item.name}\n  Qty: ${item.qty} x ₹${item.price} = ₹${item.tamount}`
-      ).join('\n\n')}
+      ${invoiceItems.map(item =>
+      `${item.name}\n  Qty: ${item.qty} x ₹${item.price} = ₹${item.tamount}`
+    ).join('\n\n')}
       
       ----------------------------------------
       Subtotal: ₹${totals.subtotal.toLocaleString()}
@@ -152,9 +177,8 @@ export const InvoiceReview = ({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring' }}
-            className={`w-20 h-20 rounded-full mx-auto flex items-center justify-center ${
-              paymentStatus === 'paid' ? 'bg-success/10' : 'bg-warning/10'
-            }`}
+            className={`w-20 h-20 rounded-full mx-auto flex items-center justify-center ${paymentStatus === 'paid' ? 'bg-success/10' : 'bg-warning/10'
+              }`}
           >
             {paymentStatus === 'paid' ? (
               <CheckCircle className="h-10 w-10 text-success" />
@@ -170,11 +194,10 @@ export const InvoiceReview = ({
             </p>
           </div>
 
-          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-            paymentStatus === 'paid' 
-              ? 'bg-success/10 text-success' 
-              : 'bg-warning/10 text-warning'
-          }`}>
+          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${paymentStatus === 'paid'
+            ? 'bg-success/10 text-success'
+            : 'bg-warning/10 text-warning'
+            }`}>
             {paymentStatus === 'paid' ? <CheckCircle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
             {paymentStatus === 'paid' ? 'Paid' : 'Payment Pending'}
           </div>
@@ -241,19 +264,57 @@ export const InvoiceReview = ({
             <User className="h-5 w-5 text-primary" />
             Customer Details
           </h2>
-          <div className="space-y-3">
-            <Input
-              placeholder="Customer Name *"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              className="h-12 bg-muted border-border"
-            />
+          <div className="space-y-3" ref={suggestionRef}>
+            <div className="relative group">
+              <Input
+                placeholder="Customer Name *"
+                value={customerName}
+                onChange={(e) => {
+                  setCustomerName(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                className="h-12 bg-muted border-border"
+              />
+
+              <AnimatePresence>
+                {showSuggestions && filteredCustomers.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute z-50 left-0 right-0 top-[calc(100%+4px)] bg-card border border-border rounded-xl shadow-lg overflow-hidden"
+                  >
+                    {filteredCustomers.map((customer) => (
+                      <button
+                        key={customer._id}
+                        onClick={() => handleSelectCustomer(customer)}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left border-b border-border last:border-0"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                          {customer.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{customer.name}</p>
+                          <p className="text-xs text-muted-foreground">{customer.phone_number}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className="relative">
               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Phone Number (Optional)"
                 value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
+                onChange={(e) => {
+                  setCustomerPhone(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
                 className="h-12 pl-12 bg-muted border-border"
               />
             </div>
@@ -266,7 +327,7 @@ export const InvoiceReview = ({
             <FileText className="h-5 w-5 text-primary" />
             Order Items
           </h2>
-          
+
           <div className="space-y-3">
             {invoiceItems.map((item, index) => (
               <div key={index} className="flex justify-between items-start py-3 border-b border-border last:border-0">

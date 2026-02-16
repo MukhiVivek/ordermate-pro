@@ -133,7 +133,7 @@ export const FloatingBucket = ({
                           <Minus className="h-4 w-4" />
                         </button>
                         <Input
-                          type="number"
+                          type="tel"
                           value={item.quantity}
                           onChange={(e) => {
                             const val = parseInt(e.target.value);
@@ -197,8 +197,8 @@ export const FloatingBucket = ({
                   </p>
                   <p className="font-semibold text-lg">₹{totals.total.toLocaleString()}</p>
                 </div>
-                <ChevronUp 
-                  className={`h-5 w-5 ml-auto text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                <ChevronUp
+                  className={`h-5 w-5 ml-auto text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                 />
               </button>
 
