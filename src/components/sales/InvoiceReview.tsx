@@ -4,6 +4,7 @@ import { ArrowLeft, FileText, CheckCircle, Clock, Download, User, Phone, Search 
 import { CartItem, InvoiceItem } from '@/types/sales';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useCustomers, Customer } from '@/hooks/useCustomers';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +22,8 @@ interface InvoiceReviewProps {
   invoiceItems: InvoiceItem[];
   onBack: () => void;
   onComplete: () => void;
+  notes: string;
+  setNotes: (notes: string) => void;
 }
 
 export const InvoiceReview = ({
@@ -28,7 +31,9 @@ export const InvoiceReview = ({
   totals,
   invoiceItems,
   onBack,
-  onComplete
+  onComplete,
+  notes,
+  setNotes
 }: InvoiceReviewProps) => {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -74,6 +79,32 @@ export const InvoiceReview = ({
     return Math.floor(1000 + Math.random() * 9000);
   };
 
+  const getLocation = (): Promise<{ latitude: number, longitude: number } | null> => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        console.error("Geolocation is not supported by this browser.");
+        resolve(null);
+        return;
+      }
+
+      console.log("Requesting current position...");
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("Position received:", position.coords);
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error("Geolocation error:", error.code, error.message);
+          resolve(null);
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    });
+  };
+
   const handleGenerateInvoice = async (status: 'pending' | 'paid') => {
     if (!customerName.trim()) {
       toast.error('Please enter customer name');
@@ -89,6 +120,26 @@ export const InvoiceReview = ({
     setPaymentStatus(status);
 
     try {
+      console.log("Starting location capture...");
+      toast.loading('Capturing location...', { id: 'location-toast' });
+
+      const location = await getLocation();
+      console.log("Location capture result:", location);
+
+      if (!location) {
+        toast.error('Location capture failed', {
+          id: 'location-toast',
+          description: 'Could not get GPS coordinates. Saving without location.'
+        });
+      } else {
+        toast.success('Location captured successfully', {
+          id: 'location-toast',
+          description: `Lat: ${location.latitude.toFixed(4)}, Lng: ${location.longitude.toFixed(4)}`
+        });
+      }
+
+      console.log("Preparing body with location:", location);
+
       const body = {
         customer_id: selectedCustomerId,
         invoice_number: `OM-${generateInvoiceNumber()}`,
@@ -104,7 +155,9 @@ export const InvoiceReview = ({
         total: totals.total,
         status,
         customerName,
-        customerPhone
+        customerPhone,
+        notes,
+        location
       };
 
       const response = await apiRequest('/ordermate/add', {
@@ -148,6 +201,9 @@ export const InvoiceReview = ({
       GST (18%): ₹${totals.tax.toLocaleString()}
       ----------------------------------------
       TOTAL: ₹${totals.total.toLocaleString()}
+      ========================================
+      NOTES:
+      ${notes || 'No special instructions'}
       ========================================
     `;
 
@@ -319,6 +375,20 @@ export const InvoiceReview = ({
               />
             </div>
           </div>
+        </div>
+
+        {/* Notes */}
+        <div className="bg-card rounded-2xl border border-border p-4 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            Order Notes
+          </h2>
+          <Textarea
+            placeholder="Add any special instructions or notes for this order..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="min-h-[100px] bg-muted border-border resize-none"
+          />
         </div>
 
         {/* Order Items */}

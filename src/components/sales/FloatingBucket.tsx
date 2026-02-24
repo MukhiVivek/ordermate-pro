@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CartItem } from '@/types/sales';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface FloatingBucketProps {
   cart: CartItem[];
@@ -17,6 +18,8 @@ interface FloatingBucketProps {
   onUpdatePrice: (productId: string, sku: string, price: number) => void;
   onRemove: (productId: string, sku: string) => void;
   onCheckout: () => void;
+  notes: string;
+  onNotesChange: (notes: string) => void;
 }
 
 export const FloatingBucket = ({
@@ -25,7 +28,9 @@ export const FloatingBucket = ({
   onUpdateQuantity,
   onUpdatePrice,
   onRemove,
-  onCheckout
+  onCheckout,
+  notes,
+  onNotesChange
 }: FloatingBucketProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
@@ -105,6 +110,7 @@ export const FloatingBucket = ({
                                 }
                               }}
                               autoFocus
+                              onFocus={(e) => e.target.select()}
                               className="h-6 w-20 text-sm px-1"
                             />
                           </div>
@@ -141,6 +147,7 @@ export const FloatingBucket = ({
                               onUpdateQuantity(item.productId, item.variant.sku, val);
                             }
                           }}
+                          onFocus={(e) => e.target.select()}
                           className="h-8 w-12 text-center text-sm font-medium px-1 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                           min={1}
                         />
@@ -159,6 +166,16 @@ export const FloatingBucket = ({
                       </div>
                     </motion.div>
                   ))}
+                </div>
+
+                {/* Notes Input in Cart */}
+                <div className="px-4 pb-4">
+                  <Textarea
+                    placeholder="Add notes for this order..."
+                    value={notes}
+                    onChange={(e) => onNotesChange(e.target.value)}
+                    className="min-h-[60px] text-sm bg-muted border-border resize-none focus:ring-1 focus:ring-primary/20"
+                  />
                 </div>
 
                 {/* Totals */}

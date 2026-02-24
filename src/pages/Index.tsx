@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, Loader2, LogOut, User } from 'lucide-react';
+import { Package, Loader2, LogOut, User, FileText } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/hooks/useCart';
 import { SearchBar } from '@/components/sales/SearchBar';
@@ -14,6 +15,7 @@ import { Button } from '@/components/ui/button';
 type ViewState = 'catalog' | 'review';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentView, setCurrentView] = useState<ViewState>('catalog');
 
@@ -29,6 +31,7 @@ const Index = () => {
     totals,
     toInvoiceItems
   } = useCart();
+  const [notes, setNotes] = useState('');
 
   // Filter products based on search
   const filteredProducts = useMemo(() => {
@@ -57,6 +60,7 @@ const Index = () => {
 
   const handleOrderComplete = () => {
     clearCart();
+    setNotes('');
     setCurrentView('catalog');
     setSearchQuery('');
   };
@@ -67,6 +71,8 @@ const Index = () => {
       <InvoiceReview
         cart={cart}
         totals={totals}
+        notes={notes}
+        setNotes={setNotes}
         invoiceItems={toInvoiceItems()}
         onBack={handleBackToCatalog}
         onComplete={handleOrderComplete}
@@ -98,6 +104,15 @@ const Index = () => {
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
                 <User className="h-5 w-5 text-primary" />
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/orders')}
+                className="rounded-full hover:bg-primary/10 text-primary transition-colors"
+                title="My Orders"
+              >
+                <FileText className="h-5 w-5" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -181,6 +196,8 @@ const Index = () => {
       <FloatingBucket
         cart={cart}
         totals={totals}
+        notes={notes}
+        onNotesChange={setNotes}
         onUpdateQuantity={updateQuantity}
         onUpdatePrice={updatePrice}
         onRemove={removeFromCart}
