@@ -5,6 +5,7 @@ import { CartItem } from '@/types/sales';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { getProductImage } from '@/lib/product-images';
 
 interface FloatingBucketProps {
   cart: CartItem[];
@@ -81,6 +82,15 @@ export const FloatingBucket = ({
                       exit={{ opacity: 0, x: 20 }}
                       className="flex items-center gap-3 p-3 bg-muted rounded-xl"
                     >
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-background flex-shrink-0 flex items-center justify-center overflow-hidden border border-border/50">
+                        {(() => {
+                          const imgSrc = getProductImage(item.productName, item.image);
+                          if (imgSrc && imgSrc !== '/placeholder.svg') {
+                            return <img src={imgSrc} alt={item.productName} className="w-full h-full object-cover" />;
+                          }
+                          return <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/30" />;
+                        })()}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-foreground truncate">
                           {item.productName}

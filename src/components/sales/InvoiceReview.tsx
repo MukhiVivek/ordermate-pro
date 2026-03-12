@@ -10,6 +10,7 @@ import { useCustomers, Customer } from '@/hooks/useCustomers';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/api';
 import { AnimatePresence } from 'framer-motion';
+import { getProductImage } from '@/lib/product-images';
 
 interface InvoiceReviewProps {
   cart: CartItem[];
@@ -399,15 +400,24 @@ export const InvoiceReview = ({
           </h2>
 
           <div className="space-y-3">
-            {invoiceItems.map((item, index) => (
-              <div key={index} className="flex justify-between items-start py-3 border-b border-border last:border-0">
-                <div>
-                  <p className="font-medium text-foreground">{item.name}</p>
+            {cart.map((item, index) => (
+              <div key={index} className="flex gap-4 items-center py-3 border-b border-border last:border-0">
+                <div className="h-10 w-10 rounded-lg bg-muted flex-shrink-0 flex items-center justify-center overflow-hidden border border-border/50">
+                  {(() => {
+                    const imgSrc = getProductImage(item.productName, item.image);
+                    if (imgSrc && imgSrc !== '/placeholder.svg') {
+                      return <img src={imgSrc} alt={item.productName} className="w-full h-full object-cover" />;
+                    }
+                    return <FileText className="h-4 w-4 text-muted-foreground/30" />;
+                  })()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground truncate">{item.productName}</p>
                   <p className="text-sm text-muted-foreground">
-                    {item.qty} × ₹{item.price.toLocaleString()}
+                    {item.quantity} × ₹{item.variant.price.toLocaleString()}
                   </p>
                 </div>
-                <p className="font-semibold">₹{item.tamount.toLocaleString()}</p>
+                <p className="font-semibold whitespace-nowrap">₹{(item.quantity * item.variant.price).toLocaleString()}</p>
               </div>
             ))}
           </div>
