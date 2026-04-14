@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Minus, Plus, Trash2, ChevronUp, Pencil } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Trash2, ChevronUp, Pencil, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { CartItem } from '@/types/sales';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ export const FloatingBucket = ({
   onRemove,
   onCheckout,
   notes,
-  onNotesChange
+  onNotesChange,
 }: FloatingBucketProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
@@ -54,51 +54,53 @@ export const FloatingBucket = ({
         )}
       </AnimatePresence>
 
-      {/* Floating Bucket */}
+      {/* Sticky bottom bar */}
       <motion.div
         layout
-        className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50"
+        className="fixed bottom-0 left-0 right-0 z-50"
       >
         <motion.div
           layout
-          className="bg-card border border-border rounded-2xl shadow-soft overflow-hidden"
+          className="bg-card border-t border-border shadow-[0_-4px_24px_-4px_hsl(0_0%_0%/0.5)] overflow-hidden"
         >
-          {/* Expanded Cart Items */}
+          {/* ── Expanded panel ── */}
           <AnimatePresence>
             {isExpanded && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="max-h-80 overflow-y-auto"
+                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                className="max-h-[55vh] overflow-y-auto"
               >
-                <div className="p-4 space-y-3">
+                <div className="px-4 pt-4 pb-2 space-y-2.5">
                   {cart.map((item) => (
                     <motion.div
                       key={`${item.productId}-${item.variant.sku}`}
                       layout
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -16 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
-                      className="flex items-center gap-3 p-3 bg-muted rounded-xl"
+                      className="flex items-center gap-3 p-2.5 bg-muted rounded-xl"
                     >
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-background flex-shrink-0 flex items-center justify-center overflow-hidden border border-border/50">
+                      {/* Thumbnail */}
+                      <div className="h-10 w-10 rounded-lg bg-background flex-shrink-0 flex items-center justify-center overflow-hidden border border-border/50">
                         {(() => {
                           const imgSrc = getProductImage(item.productName, item.image);
                           if (imgSrc && imgSrc !== '/placeholder.svg') {
                             return <img src={imgSrc} alt={item.productName} className="w-full h-full object-cover" />;
                           }
-                          return <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/30" />;
+                          return <ShoppingCart className="h-4 w-4 text-muted-foreground/30" />;
                         })()}
                       </div>
+
+                      {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-foreground truncate">
-                          {item.productName}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{item.variant.size}</p>
+                        <p className="font-semibold text-xs text-foreground truncate">{item.productName}</p>
+                        <p className="text-[10px] text-muted-foreground">{item.variant.size}</p>
                         {editingPrice === `${item.productId}-${item.variant.sku}` ? (
                           <div className="flex items-center gap-1 mt-1">
-                            <span className="text-sm text-muted-foreground">₹</span>
+                            <span className="text-xs text-muted-foreground">₹</span>
                             <Input
                               type="number"
                               value={priceInput}
@@ -121,7 +123,7 @@ export const FloatingBucket = ({
                               }}
                               autoFocus
                               onFocus={(e) => e.target.select()}
-                              className="h-6 w-20 text-sm px-1"
+                              className="h-6 w-20 text-xs px-1"
                             />
                           </div>
                         ) : (
@@ -130,23 +132,23 @@ export const FloatingBucket = ({
                               setEditingPrice(`${item.productId}-${item.variant.sku}`);
                               setPriceInput(item.variant.price.toString());
                             }}
-                            className="flex items-center gap-1 mt-1 group/price"
+                            className="flex items-center gap-1 mt-0.5 group/price"
                           >
-                            <p className="text-sm font-semibold text-primary">
+                            <p className="text-xs font-semibold text-primary">
                               ₹{item.variant.price.toLocaleString()} × {item.quantity} = ₹{(item.variant.price * item.quantity).toLocaleString()}
                             </p>
-                            <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover/price:opacity-100 transition-opacity" />
+                            <Pencil className="h-2.5 w-2.5 text-muted-foreground opacity-0 group-hover/price:opacity-100 transition-opacity" />
                           </button>
                         )}
                       </div>
 
-                      {/* Quantity Controls */}
+                      {/* Quantity controls */}
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => onUpdateQuantity(item.productId, item.variant.sku, item.quantity - 1)}
-                          className="p-1.5 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+                          className="p-1 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
                         >
-                          <Minus className="h-4 w-4" />
+                          <Minus className="h-3 w-3" />
                         </button>
                         <Input
                           type="tel"
@@ -158,84 +160,104 @@ export const FloatingBucket = ({
                             }
                           }}
                           onFocus={(e) => e.target.select()}
-                          className="h-8 w-12 text-center text-sm font-medium px-1 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          className="h-7 w-10 text-center text-xs font-medium px-0.5 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                           min={1}
                         />
                         <button
                           onClick={() => onUpdateQuantity(item.productId, item.variant.sku, item.quantity + 1)}
-                          className="p-1.5 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+                          className="p-1 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-3 w-3" />
                         </button>
                         <button
                           onClick={() => onRemove(item.productId, item.variant.sku)}
-                          className="p-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive transition-colors ml-1"
+                          className="p-1 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive transition-colors ml-0.5"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </button>
                       </div>
                     </motion.div>
                   ))}
                 </div>
 
-                {/* Notes Input in Cart */}
-                <div className="px-4 pb-4">
+                {/* Notes */}
+                <div className="px-4 pb-3">
                   <Textarea
                     placeholder="Add notes for this order..."
                     value={notes}
                     onChange={(e) => onNotesChange(e.target.value)}
-                    className="min-h-[60px] text-sm bg-muted border-border resize-none focus:ring-1 focus:ring-primary/20"
+                    className="min-h-[48px] text-xs bg-muted border-border resize-none focus:ring-1 focus:ring-primary/20"
                   />
                 </div>
 
-                {/* Totals */}
-                <div className="border-t border-border p-4 space-y-2 bg-muted/50">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>₹{totals.subtotal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
-                    <span>Total</span>
-                    <span className="text-primary">₹{totals.total.toLocaleString()}</span>
-                  </div>
+                {/* Totals strip */}
+                <div className="border-t border-border px-4 py-2.5 flex items-center justify-between bg-muted/40">
+                  <span className="text-xs text-muted-foreground">
+                    {totals.itemCount} items · Subtotal
+                  </span>
+                  <span className="text-sm font-bold text-primary">₹{totals.total.toLocaleString()}</span>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Bottom Bar */}
-          <div className="p-4 bg-card">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center gap-3 flex-1"
-              >
-                <div className="relative">
-                  <div className="p-2 bg-gradient-primary rounded-xl">
-                    <ShoppingCart className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {totals.itemCount}
-                  </span>
+          {/* ── Slim bottom bar ── */}
+          <div className="flex items-center gap-3 px-4 py-3 safe-area-pb">
+            {/* Left: tap to expand */}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-2.5 flex-1 min-w-0"
+            >
+              {/* Cart icon with badge */}
+              <div className="relative flex-shrink-0">
+                <div className="p-1.5 bg-gradient-primary rounded-xl">
+                  <ShoppingCart className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <div className="text-left">
-                  <p className="text-sm text-muted-foreground">
-                    {totals.itemCount} {totals.itemCount === 1 ? 'item' : 'items'}
-                  </p>
-                  <p className="font-semibold text-lg">₹{totals.total.toLocaleString()}</p>
-                </div>
-                <ChevronUp
-                  className={`h-5 w-5 ml-auto text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                />
-              </button>
+                <motion.span
+                  key={totals.itemCount}
+                  initial={{ scale: 1.4 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center leading-none"
+                >
+                  {totals.itemCount}
+                </motion.span>
+              </div>
 
+              {/* Summary text */}
+              <div className="text-left min-w-0">
+                <p className="text-[10px] text-muted-foreground leading-none">
+                  {totals.itemCount} {totals.itemCount === 1 ? 'item' : 'items'}
+                </p>
+                <motion.p
+                  key={totals.total}
+                  initial={{ y: -6, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="font-bold text-base text-foreground leading-tight"
+                >
+                  ₹{totals.total.toLocaleString()}
+                </motion.p>
+              </div>
+
+              {/* Chevron toggle */}
+              <motion.div
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                className="ml-auto flex-shrink-0"
+              >
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              </motion.div>
+            </button>
+
+            {/* CTA */}
+            <motion.div whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={onCheckout}
-                className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-semibold px-6 h-12"
+                className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-semibold h-10 px-4 rounded-xl flex items-center gap-1.5 text-sm whitespace-nowrap"
               >
-                Review Order
+                Review
+                <ArrowRight className="h-4 w-4" />
               </Button>
-            </div>
+            </motion.div>
           </div>
         </motion.div>
       </motion.div>

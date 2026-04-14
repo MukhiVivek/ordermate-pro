@@ -34,8 +34,8 @@ export const useCart = () => {
       if (quantity <= 0) {
         return prev.filter(item => !(item.productId === productId && item.variant.sku === sku));
       }
-      
-      return prev.map(item => 
+
+      return prev.map(item =>
         item.productId === productId && item.variant.sku === sku
           ? { ...item, quantity }
           : item
@@ -62,6 +62,11 @@ export const useCart = () => {
   const clearCart = useCallback(() => {
     setCart([]);
   }, []);
+
+  const getItemQuantity = useCallback((productId: string, sku: string): number => {
+    const item = cart.find(i => i.productId === productId && i.variant.sku === sku);
+    return item?.quantity ?? 0;
+  }, [cart]);
 
   const totals = useMemo(() => {
     const subtotal = cart.reduce(
@@ -93,6 +98,7 @@ export const useCart = () => {
     removeFromCart,
     clearCart,
     totals,
-    toInvoiceItems
+    toInvoiceItems,
+    getItemQuantity,
   };
 };
